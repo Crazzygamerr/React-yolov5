@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import ReactCrop, {
+  Crop,
+  PixelCrop,
+} from 'react-image-crop'
+
+import 'react-image-crop/dist/ReactCrop.css'
 import './App.css';
-import * as tf from '@tensorflow/tfjs';
 
 function App() {
 	const [file, setFile] = useState(null);
-	const [model, setModel] = useState(null);
 	const [result, setResult] = useState("");
+	const [resultImage, setResultImage] = useState(null);
+  const [crop, setCrop] = useState(null);
+	const [completedCrop, setCompletedCrop] = useState(null);
 	
 	// async function loadModel() {
 	// 	// const model = await tf.loadLayersModel("best_web_model/model.json");
@@ -26,17 +33,26 @@ function App() {
 		
 		// send file to api
 		const formData = new FormData();
-		formData.append("file", file);
+		formData.append(
+			"file",
+			file,
+			file.name
+		);
 		const response = await fetch("http://localhost:8000/object-to-json", {
 			method: "POST",
 			body: formData,
-			headers: {
-				"Content-Type": "multipart/form-data"
-			}
+		});
+		
+		const responseImage = await fetch("http://localhost:8000/object-to-img", {
+			method: "POST",
+			body: formData,
 		});
 		
 		const result = await response.json();
 		setResult(JSON.stringify(result, null, 2));
+		
+		const resultImage = await responseImage.blob();
+		setResultImage(URL.createObjectURL(resultImage));
 	}
 	
 	// useEffect(() => {
@@ -45,19 +61,40 @@ function App() {
 	
   return (
     <div className="App">
-			<input type="file" onChange={(event) => setFile(URL.createObjectURL(event.target.files[0]))} />
+			<input type="file" onChange={(event) => {
+				setFile(event.target.files[0])
+				setResult("");
+				setResultImage(null);
+				setCrop(null);
+				setCompletedCrop(null);
+			}} />
 			{file &&
-				<div>
-					<div>
-						<h1>{file.name}</h1>
-						<img src={file} alt="file" />
-					</div>
-					<div>
-						<button type="button" onClick={predict}>Predict</button>
-					</div>
-					<div>
-						<p>{result}</p>
-					</div>
+				<div className='App'>
+					<ReactCrop
+						crop={crop}
+						onChange={(_, percentCrop) => setCrop(percentCrop)}
+						onComplete={(c) => setCompletedCrop(c)}
+					>
+						<img
+							src={URL.createObjectURL(file)}
+							alt="file"
+							// width="400"
+							// height="400"
+						/>
+					</ReactCrop>
+					<p> Crop: { JSON.stringify(completedCrop) }</p>
+					<button type="button" onClick={predict}>Predict</button>
+					{resultImage && 
+						<div>
+							<img
+								src={resultImage}
+								alt="result"
+								width="400"
+								height="400"
+							/>
+							<pre>{result}</pre>
+						</div>
+					}
 				</div>
 			}
     </div>
