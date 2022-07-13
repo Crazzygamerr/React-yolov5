@@ -15,7 +15,10 @@ function App() {
 	async function predict() {
 		const formData = new FormData();
 		formData.append("file", file, file.name);
-		formData.append("crop", JSON.stringify(completedCrop));
+		if (completedCrop) {
+			formData.append("crop", JSON.stringify(completedCrop));
+		}
+		
 		fetch("http://localhost:8000/object-to-json", {
 			method: "POST",
 			body: formData,
