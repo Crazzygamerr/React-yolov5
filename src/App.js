@@ -56,7 +56,7 @@ function App() {
 	
   return (
 		<div className="App">
-			<input
+			{/* <input
 				type="button"
 				value="Test"
 				style={{
@@ -72,7 +72,7 @@ function App() {
 						body: form,
 					});
 					console.log(response);
-				}} />
+				}} /> */}
 			<input type="file" onChange={(event) => {
 				setFile(event.target.files[0])
 				setResult("");
@@ -96,7 +96,7 @@ function App() {
 					</ReactCrop>
 					<p> Crop: { JSON.stringify(completedCrop) }</p>
 					<button type="button" onClick={predict}>Predict</button>
-					<p>{prediction}</p>
+					<p>Prediction: {prediction}</p>
 					{resultImage && 
 						<div>
 							<img
