@@ -13,6 +13,10 @@ function App() {
 	const [completedCrop, setCompletedCrop] = useState(null);
 	
 	async function predict() {
+		setResult("");
+		setResultImage(null);
+		setPrediction(null);
+		
 		const formData = new FormData();
 		formData.append("file", file, file.name);
 		if (completedCrop) {
@@ -26,7 +30,7 @@ function App() {
 			const result = await response.json();
 			setResult(JSON.stringify(result, null, 2));	
 			
-	});
+		});
 		
 		fetch("http://localhost:8000/object-to-img", {
 			method: "POST",
@@ -35,7 +39,6 @@ function App() {
 			const resultImage = await response.blob();
 			setResultImage(URL.createObjectURL(resultImage));
 		});
-		
 		
 	}
 	
@@ -56,29 +59,13 @@ function App() {
 	
   return (
 		<div className="App">
-			{/* <input
-				type="button"
-				value="Test"
-				style={{
-					padding: '20px',
-					margin: '20px',
-				}}
-				onClick={ async () => {
-					const form = new FormData();
-					form.append("file", file, file.name);
-					form.append("crop", JSON.stringify(completedCrop));
-					const response = await fetch("http://localhost:8000/test", {
-						method: "POST",
-						body: form,
-					});
-					console.log(response);
-				}} /> */}
 			<input type="file" onChange={(event) => {
 				setFile(event.target.files[0])
 				setResult("");
 				setResultImage(null);
 				setCrop(null);
 				setCompletedCrop(null);
+				setPrediction(null);
 			}} />
 			{file &&
 				<div className='App'>
@@ -94,9 +81,13 @@ function App() {
 							// height="400"
 						/>
 					</ReactCrop>
-					<p> Crop: { JSON.stringify(completedCrop) }</p>
+					{completedCrop &&
+						<p> Crop: {JSON.stringify(completedCrop)}</p>
+					}
 					<button type="button" onClick={predict}>Predict</button>
-					<p>Prediction: {prediction}</p>
+					{prediction &&
+						<p>Prediction: {prediction}</p>
+					}
 					{resultImage && 
 						<div>
 							<img
